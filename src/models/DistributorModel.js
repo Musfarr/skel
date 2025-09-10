@@ -20,4 +20,4 @@ const distributorSchema = new mongoose.Schema({
 }
 )
 
-module.exports = mongoose.model('DistributorData', distributorSchema , "DistributorData");
+module.exports = mongoose.model('Distributor data', distributorSchema , "Distributor data");
