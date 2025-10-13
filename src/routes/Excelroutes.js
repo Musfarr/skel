@@ -21,10 +21,10 @@ router.get("/customer-dashboard-data", getCustomerDashboardData);
 
 
 // File upload routes
-router.post("/distributor-data", upload.fields([{name: 'file'}]), saveDistributorData);
-router.post("/luckydraw-data", upload.single('file'), saveLuckydrawData);
-// Data analysis routes
-router.get("/distributor-summary", getDistributorSummary);
+// router.post("/distributor-data", upload.fields([{name: 'file'}]), saveDistributorData);
+// router.post("/luckydraw-data", upload.single('file'), saveLuckydrawData);
+// // Data analysis routes
+// router.get("/distributor-summary", getDistributorSummary);
 
 
 
