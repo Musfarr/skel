@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const DistributorModel = require('../models/DistributorModel');
 const CustomerDashboardModel = require('../models/CustomerDashboardModel');
+const NewCustomerModel = require('../models/NewCustomerModel');
 const mongoose = require('mongoose');
 const saveDistributorData = expressasyncHandler(async (req, res, next) => {
     try {
@@ -162,6 +163,12 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
                 }
             },
 
+            // {
+            //     $addFields: {
+            //         numericGrossAmt: { $toDouble: "$GROSS_AMT" }
+            //     }
+            // },
+
             // group customers and sum their gross amount
             {
                 $group: {
@@ -311,18 +318,28 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
       const geoDataMap = {};
       geoData.forEach(item => {
           // Convert to string to ensure consistent comparison
+          console.log(item['Status']);
+
+          if(item['Status'] !== "Exclude"){
           const distCode = String(item['Distributor Code']);
           geoDataMap[distCode] = {
               ZONE: item.ZoneDesc,
               AREA: item.Area,
               REGION: item.Region
           };
+          }
       });
+
+      console.log(geoDataMap , "geoDataMap")
       
       console.log(`Loaded ${Object.keys(geoDataMap).length} geo data entries`);
       
       // Update Platinum customers with geo data
-      CustomerDashboardData.Platinum.data = CustomerDashboardData.Platinum.data.map(customer => {
+      CustomerDashboardData.Platinum.data =
+
+      CustomerDashboardData.Platinum.data.filter(customer => {
+        return geoDataMap[String(customer.DistributorCode)] ;
+      }).map(customer => {
           const geoInfo = geoDataMap[String(customer.DistributorCode)];
           if (geoInfo) {
               customer.ZONE = geoInfo.ZONE;
@@ -331,12 +348,15 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
               if (!customer.Region) {
                   customer.Region = geoInfo.REGION;
               }
+              return customer;
           }
-          return customer;
+          return;
       });
       
       // Update Gold customers with geo data
-      CustomerDashboardData.Gold.data = CustomerDashboardData.Gold.data.map(customer => {
+      CustomerDashboardData.Gold.data = CustomerDashboardData.Gold.data.filter(customer => {
+        return geoDataMap[String(customer.DistributorCode)] ;
+      }).map(customer => {
           const geoInfo = geoDataMap[String(customer.DistributorCode)];
           if (geoInfo) {
               customer.ZONE = geoInfo.ZONE;
@@ -344,12 +364,15 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
               if (!customer.Region) {
                   customer.Region = geoInfo.REGION;
               }
+              return customer;
           }
-          return customer;
+          return;
       });
       
       // Update Silver customers with geo data
-      CustomerDashboardData.Silver.data = CustomerDashboardData.Silver.data.map(customer => {
+      CustomerDashboardData.Silver.data = CustomerDashboardData.Silver.data.filter(customer => {
+        return geoDataMap[String(customer.DistributorCode)] ;
+      }).map(customer => {
           const geoInfo = geoDataMap[String(customer.DistributorCode)];
           if (geoInfo) {
               customer.ZONE = geoInfo.ZONE;
@@ -357,8 +380,9 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
               if (!customer.Region) {
                   customer.Region = geoInfo.REGION;
               }
+              return customer;
           }
-          return customer;
+          return;
       });
 
       await CustomerDashboardData.save();
@@ -389,4 +413,78 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
 
 
 
-module.exports = { saveDistributorData, getDistributorSummary , getDistributorData };
+
+// Getting New Sorted Customers Data
+
+const getAllCustomerData = expressasyncHandler(async (req, res) => {
+     try {
+        const hasPageParam = req.query.page !== undefined;
+        const hasLimitParam = req.query.limit !== undefined;
+        const isPaginated = hasPageParam || hasLimitParam;
+
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = Math.max(1, Math.min(5000, parseInt(req.query.limit, 10) || 1000));
+        const skip = (page - 1) * limit;
+        const search = (req.query.search || '').trim();
+        const distCd = req.query.dist_cd ? parseInt(req.query.dist_cd, 10) : null;
+
+        const filter = {};
+        if (search) {
+            const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            filter.$or = [{ cust_cd: regex }, { cust_name: regex }];
+        }
+        if (!Number.isNaN(distCd) && distCd !== null) {
+            filter.dist_cd = distCd;
+        }
+
+        let data, total;
+        if (isPaginated) {
+            [data, total] = await Promise.all([
+                NewCustomerModel.find(filter).skip(skip).limit(limit),
+                NewCustomerModel.countDocuments(filter)
+            ]);
+        } else {
+            data = await NewCustomerModel.find(filter);
+            total = data.length;
+        }
+
+        if (isPaginated) {
+            const totalPages = Math.max(1, Math.ceil(total / limit));
+            const hasNextPage = page < totalPages;
+            const hasPrevPage = page > 1;
+
+            return res.status(200).json({
+                success: true,
+                message: "Dashboard Data Generated Successfully",
+                data,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages,
+                    hasNextPage,
+                    hasPrevPage,
+                    nextPage: hasNextPage ? page + 1 : null,
+                    prevPage: hasPrevPage ? page - 1 : null
+                }
+            });
+        } else {
+            return res.status(200).json({
+                success: true,
+                message: "Dashboard Data Generated Successfully",
+                data,
+                pagination: {
+                    total,
+                    limit: null,
+                    page: null
+                }
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
+
+module.exports = { saveDistributorData, getDistributorSummary , getDistributorData , getAllCustomerData };

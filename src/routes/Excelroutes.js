@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { saveDistributorData, getDistributorSummary , getDistributorData } = require('../controllers/distributorController');
+const { saveDistributorData, getDistributorSummary , getDistributorData, getAllCustomerData } = require('../controllers/distributorController');
 const { saveLuckydrawData } = require('../controllers/luckydrawcontroller');
 const { getCustomerDashboardData } = require('../controllers/CustomerDashboardController');
 
@@ -15,7 +15,8 @@ router.get("/distributor-data", getDistributorData);
 router.get("/customer-dashboard-data", getCustomerDashboardData);
 
 
-
+// new format data 
+router.get("/new-customer-data", getAllCustomerData);
 
 
 
