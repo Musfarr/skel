@@ -1,6 +1,7 @@
 const expressasyncHandler = require("express-async-handler");
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 
 
@@ -38,16 +39,19 @@ const bcrypt = require("bcrypt");
         return res.status(401).json({ message: "Invalid email or password" });
     }
     
+    const token = jwt.sign({ id: user._id, role: user.role , email: user.email }, process.env.JWT_SECRET, { expiresIn: '10h' });
     res.status(200).json(
         {
+            status: 200,
             success: true,
             message: "Login successful",
-            data: {
+            userData: {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
             },
+            token: token
         }
         
     );

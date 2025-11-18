@@ -1,31 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { saveDistributorData, getDistributorSummary , getDistributorData, getAllCustomerData } = require('../controllers/distributorController');
-const { saveLuckydrawData } = require('../controllers/luckydrawcontroller');
-const { getCustomerDashboardData } = require('../controllers/CustomerDashboardController');
-
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
+const { getAllCustomerData } = require('../controllers/distributorController');
+const { getWinnersData , AddWinner , ClearWinnersData } = require('../controllers/WinnersController');
 
 
-// transform distributor data
-router.get("/distributor-data", getDistributorData);
 
-// Customer Dashboard Data
-router.get("/customer-dashboard-data", getCustomerDashboardData);
 
+
+
+// winners data
+router.get("/winners-data", getWinnersData);
+router.post("/add-winner", AddWinner);
+router.delete("/clear-winners-data", ClearWinnersData);
 
 // new format data 
 router.get("/new-customer-data", getAllCustomerData);
 
 
 
-
-// File upload routes
-// router.post("/distributor-data", upload.fields([{name: 'file'}]), saveDistributorData);
-// router.post("/luckydraw-data", upload.single('file'), saveLuckydrawData);
-// // Data analysis routes
-// router.get("/distributor-summary", getDistributorSummary);
 
 
 
