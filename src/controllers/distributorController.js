@@ -418,6 +418,11 @@ const getDistributorData = expressasyncHandler(async (req, res) => {
 
 const getAllCustomerData = expressasyncHandler(async (req, res) => {
      try {
+        // Disable caching for this endpoint
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        
         const hasPageParam = req.query.page !== undefined;
         const hasLimitParam = req.query.limit !== undefined;
         const isPaginated = hasPageParam || hasLimitParam;
@@ -431,7 +436,7 @@ const getAllCustomerData = expressasyncHandler(async (req, res) => {
         const filter = {};
         if (search) {
             const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-            filter.$or = [{ cust_cd: regex }, { cust_name: regex }];
+            filter.$or = [{ "Customer Code": regex }, { "Customer Name": regex }];
         }
         if (!Number.isNaN(distCd) && distCd !== null) {
             filter.dist_cd = distCd;
