@@ -433,7 +433,15 @@ const getAllCustomerData = expressasyncHandler(async (req, res) => {
         const search = (req.query.search || '').trim();
         const distCd = req.query.dist_cd ? parseInt(req.query.dist_cd, 10) : null;
 
+        const region = req.query.region; 
+
         const filter = {};
+        
+        // If region is not 'admin', filter by region
+        if (region && region.toLowerCase() !== 'admin') {
+            filter.Region = region;
+        }
+        
         if (search) {
             const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
             filter.$or = [{ "Customer Code": regex }, { "Customer Name": regex }];
