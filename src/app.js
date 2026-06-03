@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 
 // Health check route
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'unilever-campaign-backend' });
+  res.status(200).json({ status: 'ok', service: 'NFL-campaign-backend' });
 });
 
 app.use("/api", Excelroutes);

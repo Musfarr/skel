@@ -27,14 +27,15 @@ const GetWinnersCsv = expressasyncHandler(async (req , res) => {
     const winners = await Winners.find()
 
     const row = winners.map((w) => ({
-      customerCode: w.customerCode,
-      customerName: w.customerName,
+      invoice_number: w.invoice_number,
+      Name: w.Name,
+      Contact: w.Contact,
+      Cnic: w.Cnic,
+      City: w.City,
+      parsedOutlet: w.parsedOutlet,
       wonTier: w.wonTier,
       wonGiveaway: w.wonGiveaway,
       wonDate: w.wonDate,
-      zone: w.zone,
-      region: w.region,
-      area: w.area,
       giveawayId: w.giveawayId,
       createdAt: w.createdAt,
       updatedAt: w.updatedAt,
