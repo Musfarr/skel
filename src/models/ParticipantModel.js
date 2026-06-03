@@ -8,7 +8,7 @@ const participantSchema = new mongoose.Schema({
     Cnic: String,
     City: String,
     Date: Date,
-    parsedOutlet: String,
+    Store: String,
 });
 
 module.exports = mongoose.model('Participant', participantSchema, 'participants');
