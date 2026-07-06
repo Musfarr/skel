@@ -11,6 +11,7 @@ const winnersSchema = new mongoose.Schema({
     wonGiveaway: String,
     wonDate: String,
     giveawayId: String,
+    DrawUser:String
 },
 {
     timestamps: true,
